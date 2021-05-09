@@ -1,0 +1,29 @@
+html, body {
+    background-color: #66cd98;
+}
+
+.remove-margin {
+    margin-bottom: -10px;
+}
+
+.row, .container, .color {
+    background-color: #66cd98 !important;
+}
+
+.round {
+    border-radius: 20px;
+}
+
+.unit {
+    color: white;
+    font-size: 30px;
+}
+
+.introduction {
+    padding: 50px 0 0 0;
+    height: 200px;
+}
+
+.color {
+    padding: 50px 0 100px 0;
+}
