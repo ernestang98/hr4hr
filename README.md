@@ -28,4 +28,4 @@ Telegram Bot using Python which assists HR departments by allowing end-users to 
 
 - For Web App: `cd web && flask run`
 
-- For BotP: `cd bot && python3 main.py`
+- For Bot: `cd bot && python3 main.py`
