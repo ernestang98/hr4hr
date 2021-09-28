@@ -93,15 +93,9 @@ def start(update, context: CallbackContext):
         ["Exit! Thank you!"]
     ]
 
-    # menu_inline_keyboard = [
-    #     [InlineKeyboardButton("Intern Application", callback_data='ia')],
-    #     [InlineKeyboardButton("Virtual Tour", callback_data='vt')],
-    #     [InlineKeyboardButton("Employee FAQs", callback_data='ef')],
-    #     [InlineKeyboardButton("Claim Procedures", callback_data='cp')],
-    #     [InlineKeyboardButton("Exit! Thank you!", callback_data='ex')],
-    # ]
 
-    # menu_inline_keyboard_reply = InlineKeyboardMarkup(menu_inline_keyboard)
+
+
 
     menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
 
@@ -370,10 +364,13 @@ def ia_do_resubmit(update: Update, context: CallbackContext):
 
     elif str(update.message.text) == "Position":
         menu_keyboard = []
+
         for position in db.getAvailablePositions():
             menu_keyboard.append(["JobID{Id}: {Position}, {Type}"
                                  .format(Id=position[0], Position=position[1], Type=position[2])])
+    
         menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+
         update.message.reply_text('Enter your position:', reply_markup=menu_markup)
         c_user_position = True
         return C_POSITION
@@ -427,7 +424,7 @@ def cl_ask_receipt(update: Update, context: CallbackContext):
     cl_amount = update.message.text
     update.message.reply_text('Amount entered: <b>{amount}</b>'.format(amount=update.message.text),
                               parse_mode=ParseMode.HTML)
-    update.message.reply_text('Hi! Please upload picture/document of receipt')
+    update.message.reply_text('Hi! Please upload document of receipt')
     return RECEIPT
 
 
@@ -654,7 +651,7 @@ def em_show_faqs(update: Update, context: CallbackContext):
 
     for row in db.getQuestionsAndAnswers():
         base += ("<b>" + str(row[0]) + "</b>\n")
-        if row[1] is None or row[1] is "":
+        if row[1] is None or row[1] == "":
             base += "\n"
         else:
             base += (str(row[1]) + "\n")
@@ -682,7 +679,7 @@ def em_add_question(update: Update, context: CallbackContext) -> int:
         base = "<b><u>Frequently Asked Questions:</u></b>\n\n"
         for row in db.getQuestionsAndAnswers():
             base += ("<b>" + str(row[0]) + "</b>\n")
-            if row[1] is None or row[1] is "":
+            if row[1] is None or row[1] == "":
                 base += "\n"
             else:
                 base += (str(row[1]) + "\n")
@@ -720,7 +717,7 @@ def em_submit_question(update: Update, context: CallbackContext) -> int:
 
         for row in db.getQuestionsAndAnswers():
             base += ("<b>" + str(row[0]) + "</b>\n")
-            if row[1] is None or row[1] is "":
+            if row[1] is None or row[1] == "":
                 base += "\n"
             else:
                 base += (str(row[1]) + "\n")
@@ -765,17 +762,14 @@ def vt_start_tour(update: Update, context: CallbackContext) -> int:
             update.message.reply_text('Bye! I hope we can talk again some day.', reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
         elif update.message.text == "Mission":
-            # Mission Statement
-            mission_statement = "The mission of this company is to..."
+            mission_statement = "To provide superior quality services that: customers recommend to family and friends select for their clients, employees are proud of, and investors seek for long-term returns. "
             update.message.reply_text(mission_statement, parse_mode=ParseMode.HTML, reply_markup=menu_markup)
             return CONTROL
         elif update.message.text == "Vision":
-            # Vision Statement
-            vision_statement = "The vision of this company is to..."
+            vision_statement = "The vision of this company is to create a better every day life for the many people"
             update.message.reply_text(vision_statement, parse_mode=ParseMode.HTML, reply_markup=menu_markup)
             return CONTROL
         elif update.message.text == "Key Personnel":
-            # Key Personnel Statement
             menu_inline_keyboard = [
                 [InlineKeyboardButton("CEO", callback_data='ceo'), InlineKeyboardButton("CTO", callback_data='cto')],
                 [InlineKeyboardButton("CFO", callback_data='cfo'), InlineKeyboardButton("HR Manager", callback_data='hr')],
@@ -789,18 +783,17 @@ def vt_start_tour(update: Update, context: CallbackContext) -> int:
                                           document=open("assets/memo.txt", 'rb'), parse_mode=ParseMode.HTML, reply_markup=menu_markup)
             return CONTROL
         else:
-            # Layout
             update.message.reply_photo(photo=open("assets/layout.png", 'rb'), caption='Office Layout:\n\n1. Working Desks 1\n2. Pantry\n3. Toilets, Storeroom, Server Room\n4. Conference Rooms \n5. Working Desks 2\n6. Chill Rooms 1\n7. Executive Desks\n8. Chill Rooms 2', parse_mode=ParseMode.HTML, reply_markup=menu_markup)
             return CONTROL
 
     else:
         update.message.reply_document(
-            caption="Hi {name}! Welcome to John Doe's HR Consultancy! Glad to have you here!\n\n <INSERT MORE DETAILS HERE>".format(
+            caption="Hi {name}! Welcome to John Doe's HR Consultancy! Glad to have you here!".format(
             name=update.message.from_user.first_name),
             document="https://media4.giphy.com/media/y8Mz1yj13s3kI/giphy.gif"
         )
         update.message.reply_text(
-            "That's all I have to share for now! Click any one of the following buttons to find out more!",
+            "Click any one of the following buttons to find out more!",
             reply_markup=menu_markup)
 
         return CONTROL
