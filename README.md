@@ -4,9 +4,11 @@ Telegram Bot using Python which assists HR departments by allowing end-users to 
 
 ### Telegram Bot
 
-- `bot/` directory
+- `main branch` bot/ directory
 
-- `botv2/` directory (slightly different functionalities) 
+- `v2 branch` bot/directory (slightly different functionalities) 
+
+  - FAQs
   
   - appointment booking functionality
   
