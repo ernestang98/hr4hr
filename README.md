@@ -6,6 +6,14 @@ Telegram Bot using Python which assists HR departments by allowing end-users to 
 
 - `bot/` directory
 
+- `botv2/` directory (slightly different functionalities) 
+  
+  - appointment booking functionality
+  
+  - meet the team
+  
+  - list of service provided
+
 - Add credentials.json file for [google drive](https://developers.google.com/drive/api/v3/about-auth)
 
 - Add Bot token from bot father
