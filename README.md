@@ -2,11 +2,11 @@
 
 Telegram Bot using Python which assists HR departments by allowing end-users to perform the following tasks: Claims submission, Job/Internship applications, onboarding new employees and interns, as well as handling FAQs while allowing end-users to submit new questions. For the database, Google Drive API was used to store files uploaded while SQLite3 was used to store textual based data obtained or used by the above mentioned tasks.
 
-### Telegram Bot
+### Telegram Bot (`bot/` directory)
 
-- `main branch` bot/ directory
+- `main branch`(above-mentioned functionalities)
 
-- `v2 branch` bot/ directory (slightly different functionalities) 
+- `v2 branch` (slightly different functionalities) 
 
   - FAQs
   
@@ -20,9 +20,7 @@ Telegram Bot using Python which assists HR departments by allowing end-users to 
 
 - Add Bot token from bot father
 
-### Flask Web App
-
-- `web/` directory
+### Flask Web App (`web/` directory)
 
 - Used to administrate details provided by the bot (handle requests, configure onboarding process etc.)
 
