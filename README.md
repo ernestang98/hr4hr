@@ -4,7 +4,7 @@ Telegram Bot using Python which assists HR departments by allowing end-users to 
 
 ### Telegram Bot (`bot/` directory)
 
-- `main branch`(above-mentioned functionalities)
+- `main branch` (above-mentioned functionalities)
 
 - `v2 branch` (slightly different functionalities) 
 
