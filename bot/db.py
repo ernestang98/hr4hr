@@ -78,56 +78,50 @@ def loadDB():
         INSERT INTO questions
         (question, author)
         VALUES
-        ('What is the purpose of this bot?', 'Default Question')
+        ('How do i request for vacation time?', 'Default Question')
         ''')
         cur.executescript('''
         INSERT INTO questions
         (question, author)
         VALUES
-        ('What are the functions of this bot?', 'Default Question')
+        ('How do i get information about my benefits?', 'Default Question')
         ''')
         cur.executescript('''
         INSERT INTO questions
         (question, author)
         VALUES
-        ('What language was used to create this bot?', 'Default Question')
+        ('How do i report a hazard in the workplace?', 'Default Question')
         ''')
         cur.executescript('''
         INSERT INTO questions
         (question, author)
         VALUES
-        ('Who are the people behind this amazing bot', 'Default Question')
-        ''')
-        cur.executescript('''
-        INSERT INTO questions
-        (question, author)
-        VALUES
-        ('Why was this bot created?', 'Default Question')
+        ('Can a supervisor mandate work arrangements for an entire unit or department?', 'Default Question')
         ''')
 
         cur.executescript('''
         INSERT INTO answers
         (questionID, answer)
         VALUES
-        (1, 'To help HR personnel/HR Department in some of their day-to-day operations')
+        (1, 'If there are some specific dates you are interested in taking for vacation, speak to your immediate supervisor.')
         ''')
         cur.executescript('''
         INSERT INTO answers
         (questionID, answer)
         VALUES
-        (2, 'This bot is able to: Smoothen and quicken the process of job application, Give a quick overview and run-through of the organization (its structure, layout, mission, vision etc.), Handle and answers frequently asked questions (FAQs) by employees and members of the public, and create a no-fuss process of submitting claims by employees')
+        (2, 'In order to view your current benefit plan details, you can go to the ‘Employee Services’ section on our website and view ‘Benefits and Deductions’.')
         ''')
         cur.executescript('''
         INSERT INTO answers
         (questionID, answer)
         VALUES
-        (3, 'English language! Hehe just kidding... Python! :)')
+        (3, 'It is the worker’s responsibility to report any workplace hazards to their immediate supervisors. A hazard is defined as any practice, behaviour, condition, thing, situation, or a combination of these things, having the potential to cause injury or illness to a person or damage to property or equipment.')
         ''')
         cur.executescript('''
         INSERT INTO answers
         (questionID, answer)
         VALUES
-        (5, 'This was created as part of our AB0403 project diving into creating a product with python, to test our limits and have fun!')
+        (4, 'It is in the supervisor’s interest to consider individual scheduling preferences and to make the best effort to respond to these, to avoid reduced productivity or the challenges and costs of turnover. However, a supervisor may change work schedules and arrangements to accommodate organizational needs.')
         ''')
         cur.executescript('''
         INSERT INTO commitments
@@ -175,67 +169,7 @@ def loadDB():
         ('Graphic Designer', '2020-01-12', 4, 1,
         "Working with clients, briefing and advising them with regard to design style, format, print production and timescales. developing concepts, graphics and layouts for product illustrations company logos and websites. determining size and arrangement of copy and illustrative material as well as font style and size.")
         ''')
-        cur.executescript('''
-        INSERT INTO applications
-        (author, email, phone, filename, jobID, date)
-        VALUES
-        ('Alan', 'alan@gmail.com', 11111111, 'Alan Resume.pdf', 3, "2021-01-05 20:46:26.860521")
-        ''')
-        cur.executescript('''
-        INSERT INTO applications
-        (author, email, phone, filename, jobID, date)
-        VALUES
-        ('Bob', 'bob@gmail.com', 222222222, 'Bob Resume.pdf', 3, "2021-01-12 20:46:26.860521")
-        ''')
-        cur.executescript('''
-        INSERT INTO applications
-        (author, email, phone, filename, jobID, date)
-        VALUES
-        ('Charlie', 'charlie@gmail.com', 33333333, 'Charlie Resume.pdf', 3, "2021-01-03 20:46:26.860521")
-        ''')
-        cur.executescript('''
-        INSERT INTO applications
-        (author, email, phone, filename, jobID, date)
-        VALUES
-        ('Eden','eden@gmail.com', 44444444, 'Eden Resume.pdf', 1, "2020-12-17 20:46:26.860521")
-        ''')
-        cur.executescript('''
-        INSERT INTO applications
-        (author, email, phone, filename, jobID, date)
-        VALUES
-        ('Falcon','falcon@gmail.com', 5555555, 'Falcon Resume.pdf', 2, "2020-12-30 20:46:26.860521")
-        ''')
-        cur.executescript('''
-        INSERT INTO applications
-        (author, email, phone, filename, jobID, date)
-        VALUES
-        ('George','george@gmail.com', 66666666, 'George Resume.pdf', 1, "2021-01-01 20:46:26.860521")
-        ''')
 
-        cur.executescript('''
-        INSERT INTO claims
-        (company_id, name, amount, filename, date, reimbursed)
-        VALUES
-        ('EMP0001', 'Employee #1', 101.38, 'Employee #1 Proof.pdf', "2020-12-18 20:46:26.860521", 0)
-        ''')
-        cur.executescript('''
-        INSERT INTO claims
-        (company_id, name, amount, filename, date, reimbursed)
-        VALUES
-        ('EMP0002', 'Employee #2', 56.11, 'Employee #2 Proof.pdf', "2020-11-18 20:46:26.860521", 0)
-        ''')
-        cur.executescript('''
-        INSERT INTO claims
-        (company_id, name, amount, filename, date, reimbursed)
-        VALUES
-        ('EMP0003', 'Employee #3', 121.01, 'Employee #3 Proof.pdf', "2020-10-18 20:46:26.860521", 0)
-        ''')
-        cur.executescript('''
-        INSERT INTO claims
-        (company_id, name, amount, filename, date, reimbursed)
-        VALUES
-        ('EMP0004', 'Employee #4', 10.07, 'Employee #4 Proof.pdf', "2019-10-18 20:46:26.860521", 1)
-        ''')
 
     conn.commit()
     conn.close()

@@ -16,10 +16,14 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
+import telegramcalendar, telegramjcalendar
+import utils
+import messages
+
 cwd = os.path.dirname(os.path.abspath(__file__))
 os.chdir(cwd)
 
-TOKEN = "__TOKEN__"
+TOKEN = "1664239557:AAG-lvuf1GueDsJ1J646kBblUeepSXJ6eC4"
 
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -86,16 +90,12 @@ def start(update, context: CallbackContext):
         greeting = "evening "
 
     menu_keyboard = [
-        ["Job Application"],
-        ["Digital Onboarding"],
-        ["Employee FAQs"],
-        ["Submit Claims"],
+        ["Our Services"],
+        ["Meet the Team"],
+        ["FAQs"],
+        ["Book Appointment"],
         ["Exit! Thank you!"]
     ]
-
-
-
-
 
     menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
 
@@ -104,8 +104,10 @@ def start(update, context: CallbackContext):
 
 
 def ia_ask_email(update: Update, context: CallbackContext) -> int:
-    update.message.reply_text('Enter your email:')
-    return EMAIL
+    update.message.reply_photo(photo=open("assets/pic.png", 'rb'), caption='Attached is the list of our services for your perusal', parse_mode=ParseMode.HTML)
+    return ConversationHandler.END
+    # update.message.reply_text('Enter your email:')
+    # return EMAIL
 
 
 def ia_reject_email(update: Update, context: CallbackContext):
@@ -406,79 +408,169 @@ def ia_reject_submit(update: Update, context: CallbackContext):
 
 
 def cl_ask_id(update: Update, context: CallbackContext):
-    update.message.reply_text('Hi! Please provide your company ID!')
+    # update.message.reply_text('Hi! Please provide your company ID!')
+    update.message.reply_text(text=messages.calendar_message,
+                    reply_markup=telegramcalendar.create_calendar())
     return ID
+
+
+def inline_handler(update, context):
+    try:
+        query = update.callback_query
+        (kind, _, _, _, _) = utils.separate_callback_data(query.data)
+        # print(kind)
+        # print("aiysdauklsdgauksdgasd")
+        if kind == messages.CALENDAR_CALLBACK:
+            inline_calendar_handler(update, context)
+        elif kind == messages.JCALENDAR_CALLBACK:
+            inline_jcalendar_handler(update, context)                                   
+    except:
+        button(update, context)
+
+
+def inline_calendar_handler(update, context):
+    selected,date = telegramcalendar.process_calendar_selection(update, context)
+    if selected:
+        context.bot.send_message(chat_id=update.callback_query.from_user.id,
+                        text=messages.calendar_response_message % (date.strftime("%d/%m/%Y")),
+                        reply_markup=ReplyKeyboardRemove())
+        global cl_id
+        cl_id = date.strftime("%d/%m/%Y")
+        menu_keyboard = [
+            ["Confirm", "Rechoose"],
+        ]
+        menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+        context.bot.send_message(chat_id=update.callback_query.from_user.id, text='Type <b>Confirm</b> to proceed or <b>Rechoose</b> to reselect date (case sensitive)', parse_mode=ParseMode.HTML, reply_markup=menu_markup)
+
+def inline_jcalendar_handler(update: Update, context: CallbackContext):
+    selected, date = telegramjcalendar.process_calendar_selection(context.bot, update)
+    if selected:
+        context.bot.send_message(chat_id=update.callback_query.from_user.id,
+                text=messages.jcalendar_response_message % date,
+                reply_markup=ReplyKeyboardRemove())
 
 
 def cl_ask_amount(update: Update, context: CallbackContext):
     global cl_id
-    cl_id = update.message.text
-    update.message.reply_text('ID entered: <b>{id}</b>'.format(id=update.message.text),
-                              parse_mode=ParseMode.HTML)
-    update.message.reply_text('Hi! Please enter the amount to be reimbursed!')
-    return AMOUNT
+    # cl_id = update.message.text
+    # update.message.reply_text('ID entered: <b>{id}</b>'.format(id=update.message.text),
+    #                           parse_mode=ParseMode.HTML)
+    # update.message.reply_text('Hi! Please enter the amount to be reimbursed!')
+
+    # update.message.reply_text(
+    #         '<b><u>Details Entered:</u></b>\n\nName: {name}\nEmail: {email}\nPhone: {phone}\nPosition Applied: {position}\nFile Uploaded: {file}'
+    #             .format(name=update.message.from_user.first_name, email=user_email, phone=user_phone,
+    #                     position=user_position, file=user_filename),
+    #         parse_mode=ParseMode.HTML)
+
+    text = update.message.text
+
+    if text == "Confirm":
+        menu_keyboard = [
+            ["0900", "1000", "1100", "1200"],
+            ["1300", "1400", "1500", "1600"],
+            ["1700", "1800"],
+        ]
+        menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+        update.message.reply_text("Pick a time:", reply_markup=menu_markup)
+
+        return AMOUNT
+
+    else:
+        update.message.reply_text(text=messages.calendar_message,
+                        reply_markup=telegramcalendar.create_calendar())
+        return ID
 
 
 def cl_ask_receipt(update: Update, context: CallbackContext):
     global cl_amount
     cl_amount = update.message.text
-    update.message.reply_text('Amount entered: <b>{amount}</b>'.format(amount=update.message.text),
-                              parse_mode=ParseMode.HTML)
-    update.message.reply_text('Hi! Please upload document of receipt')
+    # update.message.reply_text('Amount entered: <b>{amount}</b>'.format(amount=update.message.text),
+    #                           parse_mode=ParseMode.HTML)
+    # update.message.reply_text('Hi! Please upload document of receipt')
+    update.message.reply_text("Please enter the following details:\n1. Name\n2. Email\n3. Contact Number\n4. Service\n5. Hairdresser (Optional)")
+    # menu_keyboard = [
+    #         ["Reselect", "Done"],
+    #     ]
+    # menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+    # update.message.reply_text("Confirm your details:", reply_markup=menu_markup)
     return RECEIPT
 
 
-def cl_ask_confirm(update: Update, context: CallbackContext):
-    global cl_receipt_name
-    global cl_update_receipt
+def cl_ask_location(update: Update, context: CallbackContext):
     global cl_receipt
-
-    cl_receipt_name = update.message.document.file_name
-
-    cl_receipt = context.bot.getFile(update.message.document.file_id)
-
-    cl_update_receipt = update.message.document
-
-    update.message.reply_text('Receipt uploaded: <b><u>{filename}</u></b>'.format(filename=cl_receipt_name),
-                              parse_mode=ParseMode.HTML)
-
-    global cl_id
-    global cl_amount
-
-    global c_cl_id
-    global c_cl_amount
-    global c_cl_receipt_name
-
-    if c_cl_id:
-        cl_id = update.message.text
-        c_cl_id = False
-
-    if c_cl_amount:
-        cl_amount = update.message.text
-        c_cl_amount = False
-
-    if c_cl_receipt_name:
-        cl_receipt_name = update.message.document.file_name
-        c_cl_receipt_name = False
-
-    update.message.reply_text(
-        '<b><u>Details Entered:</u></b>\n\nName: {name}\nID: {id}\nAmount: {amount}\nReceipt Uploaded: {file}'
-            .format(name=update.message.from_user.first_name,
-                    id=cl_id,
-                    amount=cl_amount,
-                    file=cl_receipt_name),
-        parse_mode=ParseMode.HTML)
-
+    cl_receipt = update.message.text
     menu_keyboard = [
-        ["ID", "Amount", "Receipt"],
-        ["No Changes"],
+        ["Reselect", "Done"],
     ]
-
     menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+    update.message.reply_text("Date selected:\n{cl_id}\n\nTime selected:\n{cl_amount}\n\nDetails entered:\n{cl_receipt}".format(cl_id=cl_id, cl_amount=cl_amount, cl_receipt=cl_receipt))
+    update.message.reply_text("Confirm your details:", reply_markup=menu_markup)
 
-    update.message.reply_text("Would you like to make any changes?", reply_markup=menu_markup)
+    return C_ID
 
-    return CL_CONFIRM
+
+def cl_ask_confirm(update: Update, context: CallbackContext):
+    text = update.message.text
+
+    if text == "Reselect":
+        update.message.reply_text(text=messages.calendar_message,
+                        reply_markup=telegramcalendar.create_calendar())
+        return ID
+    else:
+        update.message.reply_text("Booking confirmed! Thank you and see you soon!")
+        return ConversationHandler.END
+
+    # global cl_receipt_name
+    # global cl_update_receipt
+    # global cl_receipt
+
+    # cl_receipt_name = update.message.document.file_name
+
+    # cl_receipt = context.bot.getFile(update.message.document.file_id)
+
+    # cl_update_receipt = update.message.document
+
+    # update.message.reply_text('Receipt uploaded: <b><u>{filename}</u></b>'.format(filename=cl_receipt_name),
+    #                           parse_mode=ParseMode.HTML)
+
+    # global cl_id
+    # global cl_amount
+
+    # global c_cl_id
+    # global c_cl_amount
+    # global c_cl_receipt_name
+
+    # if c_cl_id:
+    #     cl_id = update.message.text
+    #     c_cl_id = False
+
+    # if c_cl_amount:
+    #     cl_amount = update.message.text
+    #     c_cl_amount = False
+
+    # if c_cl_receipt_name:
+    #     cl_receipt_name = update.message.document.file_name
+    #     c_cl_receipt_name = False
+
+    # update.message.reply_text(
+    #     '<b><u>Details Entered:</u></b>\n\nName: {name}\nID: {id}\nAmount: {amount}\nReceipt Uploaded: {file}'
+    #         .format(name=update.message.from_user.first_name,
+    #                 id=cl_id,
+    #                 amount=cl_amount,
+    #                 file=cl_receipt_name),
+    #     parse_mode=ParseMode.HTML)
+
+    # menu_keyboard = [
+    #     ["ID", "Amount", "Receipt"],
+    #     ["No Changes"],
+    # ]
+
+    # menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+
+    # update.message.reply_text("Would you like to make any changes?", reply_markup=menu_markup)
+
+    # return CL_CONFIRM
 
 
 def cl_ask_re_confirm(update: Update, context: CallbackContext):
@@ -748,12 +840,55 @@ def em_submit_question(update: Update, context: CallbackContext) -> int:
 
 
 def vt_start_tour(update: Update, context: CallbackContext) -> int:
-    menu_keyboard = [
-        ["Mission", " Vision"],
-        ["Key Personnel", "Office Layout"],
-        ["New hires checklist", "Done"]
-    ]
-    menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+    # menu_keyboard = [
+    #     ["Mission", " Vision"],
+    #     ["Key Personnel", "Office Layout"],
+    #     ["New hires checklist", "Done"]
+    # ]
+    # menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+
+    # if update.message.text == "Mission" or update.message.text == "Vision" or update.message.text == "Key Personnel" \
+    #         or update.message.text == "Office Layout" or update.message.text == "Done" \
+    #         or update.message.text == "New hires checklist":
+    #     if update.message.text == "Done":
+    #         update.message.reply_text('Bye! I hope we can talk again some day.', reply_markup=ReplyKeyboardRemove())
+    #         return ConversationHandler.END
+    #     elif update.message.text == "Mission":
+    #         mission_statement = "To provide superior quality services that: customers recommend to family and friends select for their clients, employees are proud of, and investors seek for long-term returns. "
+    #         update.message.reply_text(mission_statement, parse_mode=ParseMode.HTML, reply_markup=menu_markup)
+    #         return CONTROL
+    #     elif update.message.text == "Vision":
+    #         vision_statement = "The vision of this company is to create a better every day life for the many people"
+    #         update.message.reply_text(vision_statement, parse_mode=ParseMode.HTML, reply_markup=menu_markup)
+    #         return CONTROL
+    #     elif update.message.text == "Key Personnel":
+    #         menu_inline_keyboard = [
+    #             [InlineKeyboardButton("CEO", callback_data='ceo'), InlineKeyboardButton("CTO", callback_data='cto')],
+    #             [InlineKeyboardButton("CFO", callback_data='cfo'), InlineKeyboardButton("HR Manager", callback_data='hr')],
+    #             [InlineKeyboardButton("Done", callback_data='del')]
+    #         ]
+    #         menu_inline_keyboard_reply = InlineKeyboardMarkup(menu_inline_keyboard)
+    #         update.message.reply_text('Click on any one of the buttons to reveal more information about them!', parse_mode=ParseMode.HTML, reply_markup=menu_inline_keyboard_reply)
+    #         return CONTROL
+    #     elif update.message.text == "New hires checklist":
+    #         update.message.reply_document(caption='Great! Now that you are one of us, I need some paperwork done and documents submitted: \n\n\n1. For administrating your salary, submit your bank details\n\n2. To generate your access card, send me your NRIC and work ID\n\n3. Read the memo attached to you on working etiquette',
+    #                                       document=open("assets/memo.txt", 'rb'), parse_mode=ParseMode.HTML, reply_markup=menu_markup)
+    #         return CONTROL
+    #     else:
+    #         update.message.reply_photo(photo=open("assets/layout.png", 'rb'), caption='Office Layout:\n\n1. Working Desks 1\n2. Pantry\n3. Toilets, Storeroom, Server Room\n4. Conference Rooms \n5. Working Desks 2\n6. Chill Rooms 1\n7. Executive Desks\n8. Chill Rooms 2', parse_mode=ParseMode.HTML, reply_markup=menu_markup)
+    #         return CONTROL
+
+    # else:
+    #     update.message.reply_document(
+    #         caption="Hi {name}! Welcome to John Doe's HR Consultancy! Glad to have you here!".format(
+    #         name=update.message.from_user.first_name),
+    #         document="https://media4.giphy.com/media/y8Mz1yj13s3kI/giphy.gif"
+    #     )
+    #     update.message.reply_text(
+    #         "Click any one of the following buttons to find out more!",
+    #         reply_markup=menu_markup)
+
+    #     return CONTROL
 
     if update.message.text == "Mission" or update.message.text == "Vision" or update.message.text == "Key Personnel" \
             or update.message.text == "Office Layout" or update.message.text == "Done" \
@@ -761,68 +896,45 @@ def vt_start_tour(update: Update, context: CallbackContext) -> int:
         if update.message.text == "Done":
             update.message.reply_text('Bye! I hope we can talk again some day.', reply_markup=ReplyKeyboardRemove())
             return ConversationHandler.END
-        elif update.message.text == "Mission":
-            mission_statement = "To provide superior quality services that: customers recommend to family and friends select for their clients, employees are proud of, and investors seek for long-term returns. "
-            update.message.reply_text(mission_statement, parse_mode=ParseMode.HTML, reply_markup=menu_markup)
-            return CONTROL
-        elif update.message.text == "Vision":
-            vision_statement = "The vision of this company is to create a better every day life for the many people"
-            update.message.reply_text(vision_statement, parse_mode=ParseMode.HTML, reply_markup=menu_markup)
-            return CONTROL
-        elif update.message.text == "Key Personnel":
-            menu_inline_keyboard = [
-                [InlineKeyboardButton("CEO", callback_data='ceo'), InlineKeyboardButton("CTO", callback_data='cto')],
-                [InlineKeyboardButton("CFO", callback_data='cfo'), InlineKeyboardButton("HR Manager", callback_data='hr')],
-                [InlineKeyboardButton("Done", callback_data='del')]
+
+    menu_inline_keyboard = [
+                [InlineKeyboardButton("Bowie Chan", callback_data='ceo'), InlineKeyboardButton("John Boo", callback_data='cto')],
+                [InlineKeyboardButton("Lawrence", callback_data='cfo'), InlineKeyboardButton("Claudia Tong", callback_data='hr')],
+                [InlineKeyboardButton("Jess Zhang", callback_data='jz'), InlineKeyboardButton("Done", callback_data='del')]
             ]
-            menu_inline_keyboard_reply = InlineKeyboardMarkup(menu_inline_keyboard)
-            update.message.reply_text('Click on any one of the buttons to reveal more information about them!', parse_mode=ParseMode.HTML, reply_markup=menu_inline_keyboard_reply)
-            return CONTROL
-        elif update.message.text == "New hires checklist":
-            update.message.reply_document(caption='Great! Now that you are one of us, I need some paperwork done and documents submitted: \n\n\n1. For administrating your salary, submit your bank details\n\n2. To generate your access card, send me your NRIC and work ID\n\n3. Read the memo attached to you on working etiquette',
-                                          document=open("assets/memo.txt", 'rb'), parse_mode=ParseMode.HTML, reply_markup=menu_markup)
-            return CONTROL
-        else:
-            update.message.reply_photo(photo=open("assets/layout.png", 'rb'), caption='Office Layout:\n\n1. Working Desks 1\n2. Pantry\n3. Toilets, Storeroom, Server Room\n4. Conference Rooms \n5. Working Desks 2\n6. Chill Rooms 1\n7. Executive Desks\n8. Chill Rooms 2', parse_mode=ParseMode.HTML, reply_markup=menu_markup)
-            return CONTROL
-
-    else:
-        update.message.reply_document(
-            caption="Hi {name}! Welcome to John Doe's HR Consultancy! Glad to have you here!".format(
-            name=update.message.from_user.first_name),
-            document="https://media4.giphy.com/media/y8Mz1yj13s3kI/giphy.gif"
-        )
-        update.message.reply_text(
-            "Click any one of the following buttons to find out more!",
-            reply_markup=menu_markup)
-
-        return CONTROL
+    menu_inline_keyboard_reply = InlineKeyboardMarkup(menu_inline_keyboard)
+    update.message.reply_text('Click on any one of the buttons to reveal more information about them!', parse_mode=ParseMode.HTML, reply_markup=menu_inline_keyboard_reply)
+    return CONTROL
 
 
 def button(update: Update, context: CallbackContext) -> None:
-    menu_keyboard = [
-        ["Mission", " Vision"],
-        ["Key Personnel", "Office Layout"],
-        ["New hires checklist", "Done"]
-    ]
-    menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
+    # menu_keyboard = [
+    #     ["Mission", " Vision"],
+    #     ["Key Personnel", "Office Layout"],
+    #     ["New hires checklist", "Done"]
+    # ]
+    # menu_markup = ReplyKeyboardMarkup(menu_keyboard, one_time_keyboard=True, resize_keyboard=True)
     query = update.callback_query
     query.answer()
     if query.data == 'ceo':
-        context.bot.send_photo(photo=open("assets/ceo.jpeg", 'rb'), caption="This is Tom our CEO!", chat_id=update.callback_query.message.chat.id)
-
-    if query.data == 'cfo':
-        context.bot.send_photo(photo=open("assets/cfo.jpeg", 'rb'), caption="This is Jerry our CEO!", chat_id=update.callback_query.message.chat.id)
+        context.bot.send_photo(photo=open("assets/4.jpeg", 'rb'), caption="Name: Bowie Chan\nIntroduction: This is one of our stylists!\nExperience: 3 years\nSpeciality: Highlights, perm, styling\nInstagram: @bowiechan___", chat_id=update.callback_query.message.chat.id)
 
     if query.data == 'cto':
-        context.bot.send_photo(photo=open("assets/cto.jpeg", 'rb'), caption="This is Spike our CTO!", chat_id=update.callback_query.message.chat.id)
+        context.bot.send_photo(photo=open("assets/5.jpeg", 'rb'), caption="Name: John Boo\nIntroduction: This is one of our stylists\nExperience: 3 years\nSpeciality: Styling, haircut design\nInstagram: @hairbyjohnboo", chat_id=update.callback_query.message.chat.id)
+
+    if query.data == 'cfo':
+        context.bot.send_photo(photo=open("assets/1.jpeg", 'rb'), caption="Name: Lawrence\nIntroduction: This is one of our stylists\nExperience: 3 years\nSpeciality: Perm, hair dye, treatment\nInstagram: @hairby.lawrence", chat_id=update.callback_query.message.chat.id)
+
+    if query.data == 'jz':
+        context.bot.send_photo(photo=open("assets/2.jpeg", 'rb'), caption="Name: Jess Zhang\nIntroduction: This is one of our stylists\nExperience: 3 years\nSpeciality: Creative, Hair dye, bleaching\nInstagram: @zhang.jess", chat_id=update.callback_query.message.chat.id)
 
     if query.data == 'hr':
-        context.bot.send_photo(photo=open("assets/hr.jpeg", 'rb'), caption="This is Butch our HR Manager!", chat_id=update.callback_query.message.chat.id)
+        context.bot.send_photo(photo=open("assets/3.jpeg", 'rb'), caption="Name: Claudia Tong\nIntroduction: This is one of our stylists\nExperience: 3 years\nSpeciality: Creative, Styling, korean perm\nInstagram: @claudia_hairart", chat_id=update.callback_query.message.chat.id)
 
     if query.data == 'del':
         query.delete_message()
-        context.bot.send_message(text="Alright, now that you have a better idea of our key appointment holders, lets carry on with the onboarding process :)", reply_markup=menu_markup, chat_id=update.callback_query.message.chat.id)
+        # context.bot.send_message(text="Alright, now that you have a better idea of our key appointment holders, lets carry on with the onboarding process :)", reply_markup=menu_markup, chat_id=update.callback_query.message.chat.id)
+        context.bot.send_message(text="Thank you!", chat_id=update.callback_query.message.chat.id)
 
 
 
@@ -837,45 +949,46 @@ def error(update, context):
 
 def main():
     ia_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.regex('Job Application'), ia_ask_email)],
+        entry_points=[MessageHandler(Filters.regex('Our Services'), ia_ask_email)],
         states={
-            EMAIL: [MessageHandler(Filters.entity('email'), ia_ask_phone),
-                    MessageHandler(~Filters.entity('email'), ia_reject_email)],
-            PHONE: [MessageHandler(Filters.regex('^[0-9]*$'), ia_ask_position),
-                    MessageHandler(~Filters.regex('^[0-9]*$'), ia_reject_phone)],
-            POSITION: [MessageHandler(Filters.text, ia_ask_file)],
-            FILE: [MessageHandler(telegram.ext.filters.MergedFilter(base_filter=Filters.document.pdf,
-                                                                    or_filter=Filters.document.docx),
-                                  ia_ask_disclosure),
-                   MessageHandler(~telegram.ext.filters.MergedFilter(base_filter=Filters.document.pdf,
-                                                                     or_filter=Filters.document.docx),
-                                  ia_reject_file)],
-            DISCLOSURES: [MessageHandler(Filters.regex('^(Yes)$'), ia_ask_confirm),
-                          MessageHandler(~Filters.regex('^(Yes)$'), ia_reject_disclosures)],
-            CONFIRM: [MessageHandler(Filters.regex('No Changes'), ia_end),
-                      MessageHandler(~Filters.regex('No Changes'), ia_do_resubmit)],
+            EMAIL: [MessageHandler(Filters.text, ia_ask_confirm)],
+            # EMAIL: [MessageHandler(Filters.entity('email'), ia_ask_phone),
+            #         MessageHandler(~Filters.entity('email'), ia_reject_email)],
+            # PHONE: [MessageHandler(Filters.regex('^[0-9]*$'), ia_ask_position),
+            #         MessageHandler(~Filters.regex('^[0-9]*$'), ia_reject_phone)],
+            # POSITION: [MessageHandler(Filters.text, ia_ask_file)],
+            # FILE: [MessageHandler(telegram.ext.filters.MergedFilter(base_filter=Filters.document.pdf,
+            #                                                         or_filter=Filters.document.docx),
+            #                       ia_ask_disclosure),
+            #        MessageHandler(~telegram.ext.filters.MergedFilter(base_filter=Filters.document.pdf,
+            #                                                          or_filter=Filters.document.docx),
+            #                       ia_reject_file)],
+            # DISCLOSURES: [MessageHandler(Filters.regex('^(Yes)$'), ia_ask_confirm),
+            #               MessageHandler(~Filters.regex('^(Yes)$'), ia_reject_disclosures)],
+            # CONFIRM: [MessageHandler(Filters.regex('No Changes'), ia_end),
+            #           MessageHandler(~Filters.regex('No Changes'), ia_do_resubmit)],
 
-            C_EMAIL: [MessageHandler(Filters.entity('email'), ia_ask_confirm),
-                      MessageHandler(~Filters.entity('email'), ia_reject_email)],
+            # C_EMAIL: [MessageHandler(Filters.entity('email'), ia_ask_confirm),
+            #           MessageHandler(~Filters.entity('email'), ia_reject_email)],
 
-            C_PHONE: [MessageHandler(Filters.regex('^[0-9]*$'), ia_ask_confirm),
-                      MessageHandler(~Filters.regex('^[0-9]*$'), ia_reject_phone)],
+            # C_PHONE: [MessageHandler(Filters.regex('^[0-9]*$'), ia_ask_confirm),
+            #           MessageHandler(~Filters.regex('^[0-9]*$'), ia_reject_phone)],
 
-            C_POSITION: [MessageHandler(Filters.text, ia_ask_confirm)],
+            # C_POSITION: [MessageHandler(Filters.text, ia_ask_confirm)],
 
-            C_FILE: [MessageHandler(telegram.ext.filters.MergedFilter(base_filter=Filters.document.pdf,
-                                                                      or_filter=Filters.document.docx),
-                                    ia_ask_confirm),
-                     MessageHandler(~telegram.ext.filters.MergedFilter(base_filter=Filters.document.pdf,
-                                                                       or_filter=Filters.document.docx),
-                                    ia_reject_file)],
+            # C_FILE: [MessageHandler(telegram.ext.filters.MergedFilter(base_filter=Filters.document.pdf,
+            #                                                           or_filter=Filters.document.docx),
+            #                         ia_ask_confirm),
+            #          MessageHandler(~telegram.ext.filters.MergedFilter(base_filter=Filters.document.pdf,
+            #                                                            or_filter=Filters.document.docx),
+            #                         ia_reject_file)],
         },
         fallbacks=[MessageHandler(Filters.command, cancel)],
         allow_reentry=True
     )
 
     vt_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.regex('Digital Onboarding'), vt_start_tour)],
+        entry_points=[MessageHandler(Filters.regex('Meet the Team'), vt_start_tour)],
         states={
             CONTROL: [MessageHandler(Filters.text, vt_start_tour)],
         },
@@ -884,7 +997,7 @@ def main():
     )
 
     em_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.regex('Employee FAQs'), em_show_faqs)],
+        entry_points=[MessageHandler(Filters.regex('FAQs'), em_show_faqs)],
         states={
             NAVIGATION: [MessageHandler(Filters.text, em_add_question)],
             ADD: [MessageHandler(Filters.text, em_confirm_add)],
@@ -900,22 +1013,25 @@ def main():
     )
 
     cl_handler = ConversationHandler(
-        entry_points=[MessageHandler(Filters.regex('Submit Claims'), cl_ask_id)],
+        entry_points=[MessageHandler(Filters.regex('Book Appointment'), cl_ask_id)],
         states={
-            ID: [MessageHandler(Filters.text, cl_ask_amount)],
+            ID: [MessageHandler(telegram.ext.filters.MergedFilter(base_filter=Filters.regex('Confirm'),
+                                                                      or_filter=Filters.regex('Rechoose')), cl_ask_amount)],
             AMOUNT: [MessageHandler(Filters.regex('^[0-9]*.?[0-9]*$'), cl_ask_receipt)],
-            RECEIPT: [MessageHandler(Filters.document.image, cl_ask_confirm),
-                      MessageHandler(Filters.document.pdf, cl_ask_confirm),
-                      MessageHandler(Filters.document.docx, cl_ask_confirm),
-                      MessageHandler(Filters.document.doc, cl_ask_confirm)],
-            C_ID: [MessageHandler(Filters.text, cl_ask_re_confirm)],
-            C_AMOUNT: [MessageHandler(Filters.regex('^[0-9]*.?[0-9]*$'), cl_ask_re_confirm)],
-            C_RECEIPT: [MessageHandler(Filters.document.image, cl_ask_re_confirm),
-                        MessageHandler(Filters.document.pdf, cl_ask_re_confirm),
-                        MessageHandler(Filters.document.docx, cl_ask_re_confirm),
-                        MessageHandler(Filters.document.doc, cl_ask_re_confirm)],
-            CL_CONFIRM: [MessageHandler(Filters.regex('No Changes'), cl_end),
-                         MessageHandler(~Filters.regex('No Changes'), cl_do_resubmit)]
+            RECEIPT: [MessageHandler(Filters.text, cl_ask_location)],
+            C_ID: [MessageHandler(Filters.text, cl_ask_confirm)],
+            # RECEIPT: [MessageHandler(Filters.document.image, cl_ask_confirm),
+            #           MessageHandler(Filters.document.pdf, cl_ask_confirm),
+            #           MessageHandler(Filters.document.docx, cl_ask_confirm),
+            #           MessageHandler(Filters.document.doc, cl_ask_confirm)],
+            # C_ID: [MessageHandler(Filters.text, cl_ask_re_confirm)],
+            # C_AMOUNT: [MessageHandler(Filters.regex('^[0-9]*.?[0-9]*$'), cl_ask_re_confirm)],
+            # C_RECEIPT: [MessageHandler(Filters.document.image, cl_ask_re_confirm),
+            #             MessageHandler(Filters.document.pdf, cl_ask_re_confirm),
+            #             MessageHandler(Filters.document.docx, cl_ask_re_confirm),
+            #             MessageHandler(Filters.document.doc, cl_ask_re_confirm)],
+            # CL_CONFIRM: [MessageHandler(Filters.regex('No Changes'), cl_end),
+            #              MessageHandler(~Filters.regex('No Changes'), cl_do_resubmit)]
         },
         fallbacks=[MessageHandler(Filters.command, cancel)],
         allow_reentry=True
@@ -929,8 +1045,9 @@ def main():
     dp.add_handler(cl_handler)
     dp.add_handler(em_handler)
     dp.add_handler(vt_handler)
+    dp.add_handler(CallbackQueryHandler(inline_handler))
 
-    dp.add_handler(CallbackQueryHandler(button))
+    # dp.add_handler(CallbackQueryHandler(button))
 
     dp.add_error_handler(error)
     updater.start_polling()
@@ -940,5 +1057,4 @@ def main():
 if __name__ == '__main__':
     db.loadDB()
     db.loadQuery()
-
     main()

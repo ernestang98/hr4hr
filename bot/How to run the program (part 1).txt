@@ -1,0 +1,16 @@
+For bot directory's bot
+**Make sure pip3 & python is installed
+You need to create venv file
+
+For Windows Users:
+python -m virtualenv venv
+C:\path\to\venv\Scripts\activate.bat (cd command to get path for windows)
+pip install -r requirements.txt
+Restart command prompt
+python main.py
+
+For Mac Users:
+virtualenv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python main.py
