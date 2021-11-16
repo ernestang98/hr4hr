@@ -10,7 +10,7 @@ Telegram Bot using Python which assists HR departments by allowing end-users to 
 
   - FAQs
   
-  - appointment booking functionality
+  - appointment booking functionality on excel sheet
   
   - meet the team
   
