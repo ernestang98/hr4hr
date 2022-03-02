@@ -34,6 +34,4 @@ Telegram Bot using Python which assists HR departments by allowing end-users to 
 
 - pip3 install -r requirements.txt
 
-- For Web App: `cd web && flask run`
-
 - For Bot: `cd bot && python3 main.py`
